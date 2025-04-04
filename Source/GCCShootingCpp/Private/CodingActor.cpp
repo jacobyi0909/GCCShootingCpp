@@ -8,6 +8,9 @@ ACodingActor::ACodingActor()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	MyEditAnywhere = 1055;
+	
 }
 
 // Called when the game starts or when spawned
@@ -15,48 +18,57 @@ void ACodingActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Hash
-	TMap<FString, int32> map;
+	int32 result = AddImplEvent(10, 20);
+	UE_LOG(LogTemp, Warning, TEXT("AddImplEvent : %d"), result);
 
-	map.Add(TEXT("Jacob"), 100000000);
-	map.Add(TEXT("tom"), 5000000);
-
-	for (auto& item : map)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("key : %s, value : %d"), *item.Key, item.Value);
-	}
-
-	// 배열
-	TArray<int32> list;
+	GetWorld()->SpawnActor()
+}
 	
-	list.Empty(50);
-	
-	list.Add(10);
-	list.Add(20);
-	if (false == list.Contains(30))
-	{
-		list.Add(30);
-	}
-	UE_LOG(LogTemp, Warning, TEXT("11111111111111111"));
+void Test()
+{
+
+	// // Hash
+	// TMap<FString, int32> map;
+	//
+	// map.Add(TEXT("Jacob"), 100000000);
+	// map.Add(TEXT("tom"), 5000000);
+	//
+	// for (auto& item : map)
+	// {
+	// 	UE_LOG(LogTemp, Warning, TEXT("key : %s, value : %d"), *item.Key, item.Value);
+	// }
+	//
+	// // 배열
+	// TArray<int32> list;
+	//
+	// list.Empty(50);
+	//
+	// list.Add(10);
+	// list.Add(20);
+	// if (false == list.Contains(30))
+	// {
+	// 	list.Add(30);
+	// }
+	// UE_LOG(LogTemp, Warning, TEXT("11111111111111111"));
+	// // for (int i = 0; i < list.Num(); i++)
+	// // {
+	// // 	UE_LOG(LogTemp, Warning, TEXT("%d"), list[i]);
+	// // }
+	//
+	// for (int& item : list)
+	// {
+	// 	UE_LOG(LogTemp, Warning, TEXT("%d"), item);
+	// }
+	//
+	// list[0] = 100;
+	// list.Remove(20);
+	// list.RemoveAt(1);
+	// UE_LOG(LogTemp, Warning, TEXT("22222222222222222222"));
 	// for (int i = 0; i < list.Num(); i++)
 	// {
 	// 	UE_LOG(LogTemp, Warning, TEXT("%d"), list[i]);
 	// }
-	
-	for (int& item : list)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%d"), item);
-	}
-	
-	list[0] = 100;
-	list.Remove(20);
-	list.RemoveAt(1);
-	UE_LOG(LogTemp, Warning, TEXT("22222222222222222222"));
-	for (int i = 0; i < list.Num(); i++)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%d"), list[i]);
-	}
-	
+	//
 
 	// int32 ymd = 19501219;
 	// // 년 월 일을 각 각 출력하세요.
@@ -104,4 +116,18 @@ void ACodingActor::BeginPlay()
 void ACodingActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+int32 ACodingActor::AddCallable(int32 a, int32 b)
+{
+	return a + b;
+}
+int32 ACodingActor::AddPure(int32 a, int32 b)
+{
+	return a + b;
+}
+
+int32 ACodingActor::AddNativeEvent_Implementation(int32 a, int32 b)
+{
+	return a + b;
 }
