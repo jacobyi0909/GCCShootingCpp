@@ -21,7 +21,6 @@ void ACodingActor::BeginPlay()
 	int32 result = AddImplEvent(10, 20);
 	UE_LOG(LogTemp, Warning, TEXT("AddImplEvent : %d"), result);
 
-	GetWorld()->SpawnActor()
 }
 	
 void Test()
