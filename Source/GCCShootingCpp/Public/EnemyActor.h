@@ -23,6 +23,14 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	// 충돌처리
+	// 1. Actor기반
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+	// 2. Component기반
+	UFUNCTION()
+	void OnMyBoxCompBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+	
+
 	// 충돌체와 외관을 만들고싶다.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UBoxComponent* BoxComp;

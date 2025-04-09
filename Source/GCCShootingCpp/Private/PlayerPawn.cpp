@@ -26,6 +26,19 @@ APlayerPawn::APlayerPawn()
 	FirePoint = CreateDefaultSubobject<UArrowComponent>(TEXT("FirePoint"));
 	FirePoint->SetupAttachment(RootComponent);
 	FirePoint->SetRelativeLocationAndRotation(FVector(0, 0, 100.f), FRotator(90.f, 0, 0));
+
+	// 충돌 설정을 하고싶다.
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	
+	BoxComp->SetGenerateOverlapEvents(true);
+
+	// preset으로 반영하고싶다.
+	BoxComp->SetCollisionProfileName(TEXT("Player"));
+	
+	// BoxComp->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+	// BoxComp->SetCollisionObjectType(ECC_GameTraceChannel1);
+	// BoxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+	// BoxComp->SetCollisionResponseToChannel(ECC_GameTraceChannel3, ECR_Overlap);
 }
 
 // Called when the game starts or when spawned

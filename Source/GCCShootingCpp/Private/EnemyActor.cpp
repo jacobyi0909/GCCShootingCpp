@@ -3,6 +3,7 @@
 
 #include "EnemyActor.h"
 
+#include "BulletActor.h"
 #include "PlayerPawn.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -20,12 +21,24 @@ AEnemyActor::AEnemyActor()
 
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	MeshComp->SetupAttachment(BoxComp);
+
+	// 충돌 설정을 하고싶다.
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	
+	BoxComp->SetGenerateOverlapEvents(true);
+
+	// preset으로 반영하고싶다.
+	BoxComp->SetCollisionProfileName(TEXT("Enemy"));
+
 }
 
 // Called when the game starts or when spawned
 void AEnemyActor::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	BoxComp->OnComponentBeginOverlap.AddDynamic(this, &AEnemyActor::OnMyBoxCompBeginOverlap);
+	
 	// 태어날 때 방향을 정하고
 	int32 rv = FMath::RandRange(0, 99);
 	//  - 30%확률로 플레이어 방향, 나머지 확률로 앞 방향으로 정하고 싶다.
@@ -51,4 +64,53 @@ void AEnemyActor::Tick(float DeltaTime)
 	// P = P0 + vt
 	FVector newLocation = GetActorLocation() + Direction * Speed * DeltaTime;
 	SetActorLocation(newLocation);
+}
+
+void AEnemyActor::NotifyActorBeginOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorBeginOverlap(OtherActor);
+
+
+}
+
+void AEnemyActor::OnMyBoxCompBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	// 너죽고 나죽자
+	// 상대가 주인공이라면
+
+	APlayerPawn* player = Cast<APlayerPawn>(OtherActor);
+	if (player)
+	{
+		OtherActor->Destroy();
+	}
+	this->Destroy();
+
+	
+
+	// if (OtherActor->IsA<APlayerPawn>())
+	// {
+	// 	
+	// }
+	// else if (OtherActor->IsA<ABulletActor>())
+	// {
+	// 	
+	// }
+	//
+	//
+	// APlayerPawn* player = Cast<APlayerPawn>(OtherActor);
+	// if (player)
+	// {
+	// 	// 성공
+	// 	OtherActor->Destroy();
+	// }
+	// else
+	// {
+	// 	// player가 nullptr이다.
+	// 	ABulletActor* bullet = Cast<ABulletActor>(OtherActor);
+	// 	if (bullet)
+	// 	{
+	// 		
+	// 	}
+	// }
+	// this->Destroy();
 }
