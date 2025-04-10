@@ -3,10 +3,8 @@
 
 #include "EnemyActor.h"
 
-#include "BulletActor.h"
 #include "PlayerPawn.h"
 #include "Components/BoxComponent.h"
-#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AEnemyActor::AEnemyActor()
