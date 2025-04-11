@@ -5,6 +5,9 @@
 
 #include "PlayerPawn.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Particles/ParticleSystem.h"
 
 // Sets default values
 AEnemyActor::AEnemyActor()
@@ -28,6 +31,17 @@ AEnemyActor::AEnemyActor()
 	// preset으로 반영하고싶다.
 	BoxComp->SetCollisionProfileName(TEXT("Enemy"));
 
+	ConstructorHelpers::FObjectFinder<USoundWave> tempExpSFX(TEXT("/Script/Engine.SoundWave'/Game/Shooting/Sound/Explosion.Explosion'"));
+	if (tempExpSFX.Succeeded())
+	{
+		ExplosionSFX = tempExpSFX.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UParticleSystem> tempExpVFX(TEXT("/Script/Engine.ParticleSystem'/Game/StarterContent/Particles/P_Explosion.P_Explosion'"));
+	if (tempExpVFX.Succeeded())
+	{
+		ExplosionVFX = tempExpVFX.Object;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -52,6 +66,10 @@ void AEnemyActor::BeginPlay()
 		// 앞 방향
 		Direction = GetActorForwardVector();
 	}
+	// 향하는 방향으로 회전하고싶다.
+	FRotator newRotation = UKismetMathLibrary::MakeRotFromXZ(Direction, GetActorUpVector());
+	SetActorRotation(newRotation);
+	
 }
 
 // Called every frame
@@ -80,6 +98,15 @@ void AEnemyActor::OnMyBoxCompBeginOverlap(UPrimitiveComponent* OverlappedCompone
 	if (player)
 	{
 		OtherActor->Destroy();
+
+		// 소리를 출력하고싶다.
+		UGameplayStatics::PlaySound2D(GetWorld(), ExplosionSFX);
+		UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			ExplosionVFX,
+			this->GetActorLocation()
+		);
+		
 	}
 	this->Destroy();
 

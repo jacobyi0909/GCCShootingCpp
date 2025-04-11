@@ -6,6 +6,7 @@
 #include "BulletActor.h"
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 APlayerPawn::APlayerPawn()
@@ -29,16 +30,26 @@ APlayerPawn::APlayerPawn()
 
 	// 충돌 설정을 하고싶다.
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
-	
+
 	BoxComp->SetGenerateOverlapEvents(true);
 
 	// preset으로 반영하고싶다.
 	BoxComp->SetCollisionProfileName(TEXT("Player"));
-	
+
 	// BoxComp->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
 	// BoxComp->SetCollisionObjectType(ECC_GameTraceChannel1);
 	// BoxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	// BoxComp->SetCollisionResponseToChannel(ECC_GameTraceChannel3, ECR_Overlap);
+
+
+	// FireSFX의 값을 로드해서 넣어주고싶다.
+	//TEXT("/Script/Engine.SoundWave'/Game/Shooting/Sound/Audio_Bullet.Audio_Bullet'")
+	ConstructorHelpers::FObjectFinder<USoundWave> tempFireSFX(
+		TEXT("/Script/Engine.SoundWave'/Game/Shooting/Sound/Audio_Bullet.Audio_Bullet'"));
+	if (tempFireSFX.Succeeded())
+	{
+		FireSFX = tempFireSFX.Object;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -64,7 +75,24 @@ void APlayerPawn::Tick(float DeltaTime)
 	FVector v = dir * Speed;
 	float t = DeltaTime;
 	SetActorLocation(p0 + v * t);
-	
+
+	if (false == AutoFireUseTimer)
+	{
+		// 만약 자동총쏘기 기능이 활성화 되었다면
+		if (bAutoFire)
+		{
+			// 시간이 흐르다가
+			CurrentTime += DeltaTime;
+			// 만약 현재시간이 총쏠 시간이되면
+			if (CurrentTime > MakeBulletTime)
+			{
+				//   총알을 만들고
+				MakeBullet();
+				//   현재시간을 초기화 하고싶다.
+				CurrentTime = 0.0f;
+			}
+		}
+	}
 }
 
 // Called to bind functionality to input
@@ -76,6 +104,7 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAxis(TEXT("Vertical"), this, &APlayerPawn::OnAxisVertical);
 
 	PlayerInputComponent->BindAction(TEXT("Fire"), IE_Pressed, this, &APlayerPawn::OnActionFirePressed);
+	PlayerInputComponent->BindAction(TEXT("Fire"), IE_Released, this, &APlayerPawn::OnActionFireReleased);
 }
 
 void APlayerPawn::OnAxisHorizontal(float value)
@@ -90,11 +119,39 @@ void APlayerPawn::OnAxisVertical(float value)
 
 void APlayerPawn::OnActionFirePressed()
 {
+	// 자동총쏘기 기능을 활성화 하고싶다.
+	if (AutoFireUseTimer)
+	{
+		// 타이머를 등록하고싶다.
+		GetWorldTimerManager().SetTimer(
+			MakeBulletTimerHandle,
+			this,
+			&APlayerPawn::MakeBullet,
+			MakeBulletTime, true
+		);
+	}
+	else
+	{
+		// 현재시간을 초기화 하고 총알을 미리 하나 만들고싶다.
+		bAutoFire = true;
+		CurrentTime = 0;
+	}
+	
 	MakeBullet();
 }
 
 void APlayerPawn::OnActionFireReleased()
 {
+	// 자동총쏘기 기능을 비활성화 하고싶다.
+	if (AutoFireUseTimer)
+	{
+		// 타이머를 취소하고싶다.
+		GetWorldTimerManager().ClearTimer(MakeBulletTimerHandle);
+	}
+	else
+	{
+		bAutoFire = false;
+	}
 }
 
 void APlayerPawn::MakeBullet()
@@ -102,5 +159,7 @@ void APlayerPawn::MakeBullet()
 	// 총알공장에서 총알을 하나 생성해서 총구위치에 배치하고싶다.
 	FTransform t = FirePoint->GetComponentTransform();
 	GetWorld()->SpawnActor<ABulletActor>(BulletFactory, t);
-}
 
+	// 소리를 출력하고싶다.
+	UGameplayStatics::PlaySound2D(GetWorld(), FireSFX);
+}

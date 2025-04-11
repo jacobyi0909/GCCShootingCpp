@@ -38,5 +38,13 @@ public:
 	// 이동크기
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Speed = 1000.f;
+
+	// 내가 파괴될 때 소리를 출력하고싶다.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USoundBase* ExplosionSFX;
+
+	// 적과 부딪히면 폭발VFX를 표현하고싶다.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UParticleSystem* ExplosionVFX;
 };
 

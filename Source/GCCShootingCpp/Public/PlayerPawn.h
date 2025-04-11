@@ -59,5 +59,21 @@ public:
 	// 총구위치
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UArrowComponent* FirePoint;
+
+	// MakeBullet이 호출되면 총알발사 소리를 출력하고싶다.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USoundBase* FireSFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool AutoFireUseTimer;
+	// 자동 총쏘기 기능을 만들고싶다.
+	// 마우스 왼쪽 버튼을 누르고 있으면 총알이 0.25초마다 발사되게 하고싶다.
+	// 자동총쏘기가 활성 / 비활성
+	bool bAutoFire;
+	// 시간이 흐르다가 발사 시간이 되면
+	float CurrentTime;
+	float MakeBulletTime = 0.25f;
+
+	FTimerHandle MakeBulletTimerHandle;
 };
 

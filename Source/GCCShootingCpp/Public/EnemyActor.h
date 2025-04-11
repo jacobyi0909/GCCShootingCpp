@@ -44,4 +44,11 @@ public:
 	// 태어날 때 방향을 정하고
 	//  - 30%확률로 플레이어 방향, 나머지 확률로 앞 방향으로 정하고 싶다.
 	// 살아가면서 그 방향으로 이동하고 싶다.
+
+	// 내가 파괴될 때 소리를 출력하고싶다.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USoundBase* ExplosionSFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UParticleSystem* ExplosionVFX;
 };
