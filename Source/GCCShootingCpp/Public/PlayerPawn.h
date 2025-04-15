@@ -75,5 +75,25 @@ public:
 	float MakeBulletTime = 0.25f;
 
 	FTimerHandle MakeBulletTimerHandle;
+
+
+	// 체력을 갖고싶다.
+	// 현재체력, 최대체력
+	// 태어날 때
+	//  - 현재체력을 최대체력으로 하고싶다.  
+	//  - PlayerHPWidget을 생성해서 기억하고싶다.
+	// 적과 플레이어가 부딪히면 체력을 1 감소하고 UI도 갱신하고싶다.
+	// 만약 체력이 0이하라면 파괴되게 하고싶다.
+	int32 CurHP;
+
+	int32 MaxHP = 3;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UUserWidget> PlayerHPWidgetFactory;
+
+	UPROPERTY(EditAnywhere)
+	class UPlayerHPWidget* PlayerHPWidget;
+
+	void MyTakeDamage(int32 damage);
 };
 

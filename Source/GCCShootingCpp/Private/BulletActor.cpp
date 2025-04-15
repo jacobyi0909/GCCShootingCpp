@@ -4,6 +4,7 @@
 #include "BulletActor.h"
 
 #include "EnemyActor.h"
+#include "ShootingGameMode.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
@@ -95,6 +96,11 @@ void ABulletActor::OnMyBoxCompBeginOverlap(UPrimitiveComponent* OverlappedCompon
 			ExplosionVFX,
 			enemy->GetActorLocation()
 		);
+
+		// 점수를 1점 증가시키고싶다.
+		// 점수를 누가갖고있나??? => 게임모드
+		auto* gm = Cast<AShootingGameMode>(GetWorld()->GetAuthGameMode());
+		gm->AddScore(1);
 	}
 	this->Destroy();
 }

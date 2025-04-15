@@ -4,6 +4,7 @@
 #include "PlayerPawn.h"
 
 #include "BulletActor.h"
+#include "PlayerHPWidget.h"
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -56,6 +57,17 @@ APlayerPawn::APlayerPawn()
 void APlayerPawn::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// 태어날 때
+	//  - 현재체력을 최대체력으로 하고싶다.  
+	CurHP = MaxHP;
+	//  - PlayerHPWidget을 생성해서 기억하고싶다.
+	PlayerHPWidget = Cast<UPlayerHPWidget>(CreateWidget(GetWorld(), PlayerHPWidgetFactory));
+
+	// PlayerHPWidgetFactory가 nullptr이거나? PlayerHPWidgetFactory가 UPlayerHPWidget를 상속받지않았다면...
+	check(PlayerHPWidget)
+	
+	PlayerHPWidget->AddToViewport();
 }
 
 // Called every frame
@@ -162,4 +174,11 @@ void APlayerPawn::MakeBullet()
 
 	// 소리를 출력하고싶다.
 	UGameplayStatics::PlaySound2D(GetWorld(), FireSFX);
+}
+
+void APlayerPawn::MyTakeDamage(int32 damage)
+{
+	CurHP -= damage;
+	PlayerHPWidget->UpdateHPBar(CurHP, MaxHP);
+	
 }

@@ -4,6 +4,7 @@
 #include "EnemyActor.h"
 
 #include "PlayerPawn.h"
+#include "ShootingGameMode.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -97,7 +98,18 @@ void AEnemyActor::OnMyBoxCompBeginOverlap(UPrimitiveComponent* OverlappedCompone
 	APlayerPawn* player = Cast<APlayerPawn>(OtherActor);
 	if (player)
 	{
-		OtherActor->Destroy();
+		// 주인공의 체력을 1 감소하고싶다.
+		player->MyTakeDamage(1);
+		// 만약 주인공의 체력이 0 이하라면
+		if (player->CurHP <= 0)
+		{
+			// 주인공을 파괴 하고싶다.
+			player->Destroy();
+
+			// 게임모드의 ShowGameOverWidget기능을 호출하고싶다.
+			auto* gm = Cast<AShootingGameMode>(GetWorld()->GetAuthGameMode());
+			gm->ShowGameOverWidget();
+		}
 
 		// 소리를 출력하고싶다.
 		UGameplayStatics::PlaySound2D(GetWorld(), ExplosionSFX);
@@ -106,7 +118,6 @@ void AEnemyActor::OnMyBoxCompBeginOverlap(UPrimitiveComponent* OverlappedCompone
 			ExplosionVFX,
 			this->GetActorLocation()
 		);
-		
 	}
 	this->Destroy();
 
