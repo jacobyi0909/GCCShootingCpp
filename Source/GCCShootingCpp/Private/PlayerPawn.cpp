@@ -8,6 +8,7 @@
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 APlayerPawn::APlayerPawn()
@@ -66,7 +67,7 @@ void APlayerPawn::BeginPlay()
 
 	// PlayerHPWidgetFactory가 nullptr이거나? PlayerHPWidgetFactory가 UPlayerHPWidget를 상속받지않았다면...
 	check(PlayerHPWidget)
-	
+
 	PlayerHPWidget->AddToViewport();
 
 
@@ -127,6 +128,9 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	PlayerInputComponent->BindAction(TEXT("Fire"), IE_Pressed, this, &APlayerPawn::OnActionFirePressed);
 	PlayerInputComponent->BindAction(TEXT("Fire"), IE_Released, this, &APlayerPawn::OnActionFireReleased);
+
+	PlayerInputComponent->BindAction(TEXT("FireRound"), IE_Pressed, this, &APlayerPawn::OnActionFireRound);
+	PlayerInputComponent->BindAction(TEXT("FireRoundInterval"), IE_Pressed, this, &APlayerPawn::OnActionFireRoundInterval);
 }
 
 void APlayerPawn::OnAxisHorizontal(float value)
@@ -158,7 +162,7 @@ void APlayerPawn::OnActionFirePressed()
 		bAutoFire = true;
 		CurrentTime = 0;
 	}
-	
+
 	MakeBullet();
 }
 
@@ -178,30 +182,98 @@ void APlayerPawn::OnActionFireReleased()
 
 void APlayerPawn::MakeBullet()
 {
+	MakeBullet(FVector::ZeroVector, false);
+}
+
+ABulletActor* APlayerPawn::MakeBullet(FVector location, bool bFireRound)
+{
 	// Magazine에 총알이 들어있지 않으면 바로 종료
 	if (Magazine.Num() <= 0)
 	{
-		return;
+		return nullptr;
 	}
 
 	// 탄창에서 총알을 하나 가져와서 활성처리 하고싶다.
 	auto* bullet = Magazine[0];
 
-	FTransform t = FirePoint->GetComponentTransform();
-	bullet->SetActorTransform(t);
+	if (bFireRound)
+	{
+		bullet->SetActorLocation(location);
+	}
+	else
+	{
+		FTransform t = FirePoint->GetComponentTransform();
+		bullet->SetActorTransform(t);
+	}
 	bullet->SetActive(true);
 
 	// 탄창에서 제거하고싶다.
 	Magazine.RemoveAt(0);
-	
+
 
 	// 소리를 출력하고싶다.
 	UGameplayStatics::PlaySound2D(GetWorld(), FireSFX);
+
+	return bullet;
 }
 
 void APlayerPawn::MyTakeDamage(int32 damage)
 {
 	CurHP -= damage;
 	PlayerHPWidget->UpdateHPBar(CurHP, MaxHP);
-	
+}
+
+void APlayerPawn::OnActionFireRound()
+{
+	float angle = 15.0f;
+	FQuat rot = GetActorQuat();
+	FVector up = GetActorUpVector();
+
+	FQuat addAngle = FRotator(0, 0, angle).Quaternion();
+
+	for (float i = 0; i < 360; i += angle)
+	{
+		FVector loc = GetActorLocation() + (rot * up) * 50.f;
+		auto* bullet = MakeBullet(loc, true);
+		if (bullet)
+		{
+			FVector newDir = (rot * up).GetSafeNormal();
+			FVector bulletUp = -GetActorForwardVector();
+			bullet->SetActorRotation(UKismetMathLibrary::MakeRotFromXZ(newDir, bulletUp));
+		}
+		rot *= addAngle;
+	}
+}
+
+void APlayerPawn::OnActionFireRoundInterval()
+{
+	FTimerHandle handle;
+	StartRot = GetActorQuat();
+	AngleRoundInterval = 0;
+	GetWorldTimerManager().SetTimer(handle, this, &APlayerPawn::MakeBulletRoundInterval, 0.01f, false);
+
+}
+
+void APlayerPawn::MakeBulletRoundInterval()
+{
+	float angle = 15.0f;
+	FVector up = GetActorUpVector();
+
+	FQuat addAngle = FRotator(0, 0, angle).Quaternion();
+
+	FVector loc = GetActorLocation() + (StartRot * up) * 50.f;
+	auto* bullet = MakeBullet(loc, true);
+	if (bullet)
+	{
+		FVector newDir = (StartRot * up).GetSafeNormal();
+		FVector bulletUp = -GetActorForwardVector();
+		bullet->SetActorRotation(UKismetMathLibrary::MakeRotFromXZ(newDir, bulletUp));
+	}
+	StartRot *= addAngle;
+	AngleRoundInterval += angle;
+	if (AngleRoundInterval < 360.0f * 2)
+	{
+		FTimerHandle handle;
+		GetWorldTimerManager().SetTimer(handle, this, &APlayerPawn::MakeBulletRoundInterval, 0.01f, false);
+	}
 }

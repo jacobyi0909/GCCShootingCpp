@@ -22,7 +22,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -52,6 +52,7 @@ public:
 	void OnActionFirePressed();
 	void OnActionFireReleased();
 	// 총알공장에서 총알을 하나 생성해서 총구위치에 배치하고싶다.
+	class ABulletActor* MakeBullet(FVector location, bool bFireRound);
 	void MakeBullet();
 	// 총알공장
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -102,6 +103,14 @@ public:
 	TArray<class ABulletActor*> Magazine;
 	// 몇개를 미리 만들것인지에대한 Count
 	UPROPERTY(EditAnywhere)
-	int32 MaxBulletCount = 10;
-};
+	int32 MaxBulletCount = 200;
 
+	void OnActionFireRound();
+	void OnActionFireRoundInterval();
+
+	void MakeBulletRoundInterval();
+
+	FQuat StartRot;
+	float AngleRoundInterval;
+
+};
