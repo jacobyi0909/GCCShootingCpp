@@ -16,5 +16,10 @@ class GCCSHOOTINGCPP_API UScoreWidget : public UUserWidget
 public:
 
 	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* TextHighScore;
+	
+	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* TextScore;
+
+	void UpdateScore(int32 score, int32 highScore);
 };

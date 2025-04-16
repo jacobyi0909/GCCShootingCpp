@@ -46,5 +46,11 @@ public:
 	// 적과 부딪히면 폭발VFX를 표현하고싶다.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UParticleSystem* ExplosionVFX;
+
+
+	void SetActive(bool isActive);
+
+	// 총알이 어딘가 부딪히면 파괴되지 않고 주인공의 탄창에 다시 들어가고싶다.
+	void ReturnToMagazine();
 };
 

@@ -19,7 +19,7 @@ public:
 
 	UPROPERTY(EditAnywhere, blueprintReadWrite)
 	int32 Score;
-	
+
 	// 태어날 때 UI를 만들어서 화면에 보이게하고싶다.
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UUserWidget> ScoreWidgetFactory;
@@ -32,6 +32,26 @@ public:
 	void AddScore(int32 Point);
 
 
+	// 최고 점수를 기록하고 싶다.
+	// 속성 : 최고점수
+	// 태어날 때 저장된 HighScore값을 가져와서(Load) 반영하고싶다.
+	// AddScore할 때 Score가 HighScore보다 크다면 HighScore를 Score로 갱신하고 저장(Save)하고싶다.
+	UPROPERTY(EditAnywhere, blueprintReadWrite)
+	int32 HighScore;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void LoadHighScore();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void SaveHighScore();
+
+	UPROPERTY(EditAnywhere, blueprintReadWrite)
+	FString SaveGameSlotName = TEXT("HighScoreSaveData");
+
+	UPROPERTY(EditAnywhere, blueprintReadWrite)
+	int32 SaveGameSlotIndex = 0;
+
+	
 
 	// 게임오버 처리하고싶다.
 	UPROPERTY(EditAnywhere)

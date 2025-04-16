@@ -68,6 +68,16 @@ void APlayerPawn::BeginPlay()
 	check(PlayerHPWidget)
 	
 	PlayerHPWidget->AddToViewport();
+
+
+	Magazine.Empty(MaxBulletCount);
+	for (int32 i = 0; i < MaxBulletCount; i++)
+	{
+		ABulletActor* bullet = GetWorld()->SpawnActor<ABulletActor>(BulletFactory);
+		// bullet을 세상에서 존재하지 않게 하고 싶다. -> 비활성화 하고싶다.
+		bullet->SetActive(false);
+		Magazine.Add(bullet);
+	}
 }
 
 // Called every frame
@@ -168,9 +178,22 @@ void APlayerPawn::OnActionFireReleased()
 
 void APlayerPawn::MakeBullet()
 {
-	// 총알공장에서 총알을 하나 생성해서 총구위치에 배치하고싶다.
+	// Magazine에 총알이 들어있지 않으면 바로 종료
+	if (Magazine.Num() <= 0)
+	{
+		return;
+	}
+
+	// 탄창에서 총알을 하나 가져와서 활성처리 하고싶다.
+	auto* bullet = Magazine[0];
+
 	FTransform t = FirePoint->GetComponentTransform();
-	GetWorld()->SpawnActor<ABulletActor>(BulletFactory, t);
+	bullet->SetActorTransform(t);
+	bullet->SetActive(true);
+
+	// 탄창에서 제거하고싶다.
+	Magazine.RemoveAt(0);
+	
 
 	// 소리를 출력하고싶다.
 	UGameplayStatics::PlaySound2D(GetWorld(), FireSFX);

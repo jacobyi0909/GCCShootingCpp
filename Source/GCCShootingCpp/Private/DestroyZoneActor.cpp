@@ -3,14 +3,15 @@
 
 #include "DestroyZoneActor.h"
 
+#include "BulletActor.h"
 #include "Components/BoxComponent.h"
 
 // Sets default values
 ADestroyZoneActor::ADestroyZoneActor()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	
+
 	// 충돌체를 생성해서 루트로 설정 하고싶다.
 	BoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComp"));
 	SetRootComponent(BoxComp);
@@ -23,7 +24,7 @@ ADestroyZoneActor::ADestroyZoneActor()
 
 	// 충돌 설정을 하고싶다.
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
-	
+
 	BoxComp->SetGenerateOverlapEvents(true);
 
 	// preset으로 반영하고싶다.
@@ -35,19 +36,28 @@ void ADestroyZoneActor::BeginPlay()
 {
 	Super::BeginPlay();
 	BoxComp->OnComponentBeginOverlap.AddDynamic(this,
-		&ADestroyZoneActor::OnMyBoxCompBeginOverlap);
+	                                            &ADestroyZoneActor::OnMyBoxCompBeginOverlap);
 }
 
 // Called every frame
 void ADestroyZoneActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void ADestroyZoneActor::OnMyBoxCompBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+                                                UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                                const FHitResult& SweepResult)
 {
-	OtherActor->Destroy();
+	// 상대가 총알이면 파괴안함
+	ABulletActor* bullet = Cast<ABulletActor>(OtherActor);
+	if (bullet)
+	{
+		bullet->ReturnToMagazine();
+	}
+	// 그렇지않으면 파괴
+	else
+	{
+		OtherActor->Destroy();
+	}
 }
-

@@ -95,5 +95,13 @@ public:
 	class UPlayerHPWidget* PlayerHPWidget;
 
 	void MyTakeDamage(int32 damage);
+
+	// 총알을 ObjectPool방식으로 제어하고싶다.
+	// 탄창
+	UPROPERTY()
+	TArray<class ABulletActor*> Magazine;
+	// 몇개를 미리 만들것인지에대한 Count
+	UPROPERTY(EditAnywhere)
+	int32 MaxBulletCount = 10;
 };
 

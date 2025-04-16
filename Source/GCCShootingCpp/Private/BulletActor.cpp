@@ -4,6 +4,7 @@
 #include "BulletActor.h"
 
 #include "EnemyActor.h"
+#include "PlayerPawn.h"
 #include "ShootingGameMode.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -71,6 +72,9 @@ void ABulletActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// if (false == MeshComp->IsVisible())
+	// 	return;
+
 	FVector dir = GetActorForwardVector();
 
 	SetActorLocation(GetActorLocation() + dir * Speed * DeltaTime);
@@ -87,7 +91,7 @@ void ABulletActor::OnMyBoxCompBeginOverlap(UPrimitiveComponent* OverlappedCompon
 	AEnemyActor* enemy = Cast<AEnemyActor>(OtherActor);
 	if (enemy)
 	{
-		OtherActor->Destroy();
+		enemy->Destroy();
 		// 소리를 출력하고싶다.
 		UGameplayStatics::PlaySound2D(GetWorld(), ExplosionSFX);
 		// vfx를 표현하고싶다.
@@ -101,8 +105,42 @@ void ABulletActor::OnMyBoxCompBeginOverlap(UPrimitiveComponent* OverlappedCompon
 		// 점수를 누가갖고있나??? => 게임모드
 		auto* gm = Cast<AShootingGameMode>(GetWorld()->GetAuthGameMode());
 		gm->AddScore(1);
+
+		// 다시 탄창으로 복귀하고싶다.
+		ReturnToMagazine();
 	}
-	this->Destroy();
+}
+
+void ABulletActor::SetActive(bool isActive)
+{
+	this->RegisterAllActorTickFunctions(isActive, true);
+	if (isActive)
+	{
+		// 보이게하고
+		MeshComp->SetVisibility(true);
+		// 충돌체 켜고싶다.
+		BoxComp->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+	}
+	else
+	{
+		// 안보이게하고
+		MeshComp->SetVisibility(false);
+		// 충돌체 끄고싶다.
+		BoxComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	}
+
+}
+
+void ABulletActor::ReturnToMagazine()
+{
+	// 주인공을 찾고싶다.
+	auto* player = Cast<APlayerPawn>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	// 주인공의 Magazine에 내가 추가되고싶다.
+	if (player && !player->Magazine.Contains(this))
+	{
+		this->SetActive(false);
+		player->Magazine.Add(this);
+	}
 }
 
 
