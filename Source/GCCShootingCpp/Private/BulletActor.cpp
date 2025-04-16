@@ -128,7 +128,6 @@ void ABulletActor::SetActive(bool isActive)
 		// 충돌체 끄고싶다.
 		BoxComp->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 	}
-
 }
 
 void ABulletActor::ReturnToMagazine()
